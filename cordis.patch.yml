@@ -1,0 +1,20 @@
+# dsh-empty-text-guard bundle patch.
+#
+# 一行：把「正文为空就不收尾」的守卫挂到 agent loop 的收尾前钩子上。
+#
+# 工作原理（都用官方扩展点，不改核心代码）：
+#   agent loop 结束一轮前会先 await dispatch.serial("agent/turn-stopping")，
+#   然后才检查 `inbox.nextStep.length === 0` 决定是否 break。
+#   本插件在该钩子里发现「最后一条 assistant 消息没有任何 text 块」时，
+#   往 next-step 塞一条内部提示 —— 长度不再为 0，于是不收尾、再走一步，
+#   模型因此获得重新输出正文的机会。与内置 dsh-goal-round-driver 同一机制。
+#
+# maxAttempts：同一个 turn 最多注入几次。用完就放行并记 warn，避免死循环。
+
+- insert:
+    - id: empty-text-guard
+      name: 'dsh-empty-text-guard'
+      config:
+        enabled: true
+        maxAttempts: 3
+        minTextChars: 1
