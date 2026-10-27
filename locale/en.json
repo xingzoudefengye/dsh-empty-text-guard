@@ -1,0 +1,5 @@
+{
+  "meta": {
+    "description": "Don't end a turn on an empty answer: when the model emits only reasoning and no visible text, re-prompt it via the agent/turn-stopping hook until real content is produced."
+  }
+}
